@@ -1,0 +1,207 @@
+{% extends "sgfood/base.html" %}
+{% load static %}
+{% block title %} Restaurant {% endblock %}
+{% block content %}
+<br />
+<br />
+
+<link rel="stylesheet" href="{% static 'sgfood/style/style.css' %}">
+
+<div class="container-fluid">
+    <div class="row justify-content-md-center">
+        <div class="col-md-6">
+            <div class="text-center">
+                <h1>{{ restaurant.name}}</h1>
+                <input type="hidden" id="hidden-restaurant-id" value="{{restaurant.id}}">
+            </div>
+        </div>
+    </div>
+
+    <div class="row justify-content-md-center">
+        <div class="col-md-0">
+            <i class="fas fa-map-marker-alt"></i>
+        </div>
+        <div class="col-md-4">
+            <p>
+                Address:
+                <span>{{ restaurant.address }} </span>
+            </p>
+        </div>
+    </div>
+
+    <div class="row justify-content-md-center">
+        <div class="col-md-0">
+            <i class="far fa-comment-dots"></i>
+        </div>
+        <div class="col-md-4">
+            <p>
+                No. of reviews:
+                <span id="span-review-count">{{reviews.count}}</span>
+            </p>
+        </div>
+    </div>
+
+    <div class="row justify-content-md-center">
+        <div class="col-md-0">
+            <i class="far fa-star"></i>
+        </div>
+        <div class="col-md-4">
+            <p>
+                Average Rating:
+                <button class="btn btn-sm btn-dark" disabled id="span-avg-rate">{{avg_rate}}</button>
+            </p>
+        </div>
+    </div>
+
+
+    <div class="row justify-content-md-center">
+        <div class="col-md-6">
+            <img src="{% static 'sgfood/icon/' %}{{restaurant.name}}.jpg" class="center rounded" alt="restaurant image">
+        </div>
+    </div>
+    <br />
+
+    <!-- new review place -->
+    <div class="row justify-content-md-center" style="background:rgba(255,255,255,0.5);">
+        <div class="col-md-4">
+            <div class="form-group">
+                <label for="textarea-review">Review</label>
+                <textarea class="form-control rounded-0" id="textarea-review" rows="3"
+                    placeholder="Write something here..."></textarea>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <br />
+            <br />
+            <span id="span-star-1" class="span-star fa fa-star-o unchecked" data-star-id="1"></span>
+            <span id="span-star-2" class="span-star fa fa-star-o unchecked" data-star-id="2"></span>
+            <span id="span-star-3" class="span-star fa fa-star-o unchecked" data-star-id="3"></span>
+            <span id="span-star-4" class="span-star fa fa-star-o unchecked" data-star-id="4"></span>
+            <span id="span-star-5" class="span-star fa fa-star-o unchecked" data-star-id="5"></span>
+            <input type="hidden" id="hidden-total-star" value="0">
+            <br />
+            <button class="btn" id="btn-post-review" type="button">Post Review</button>
+        </div>
+    </div>
+
+    <!-- review and comment -->
+    <div id="my-review-div" class="row justify-content-md-center">
+        {% include 'sgfood/review.html' %}
+    </div>
+</div>
+
+{% endblock content %}
+
+{% block javascript %}
+<script>
+    $(document).ready(function () {
+        // change the star css
+        function setStarValue(arr, value) {
+            let i;
+            let thresh = parseInt(value);
+            for (i = 0; i < arr.length; i++) {
+                if (i < thresh) {
+                    arr[i].removeClass("unchecked").addClass("checked");
+                    arr[i].removeClass("fa-star-o").addClass("fa-star");
+                } else {
+                    arr[i].removeClass("checked").addClass("unchecked");
+                    arr[i].removeClass("fa-star").addClass("fa-star-o");
+                }
+            }
+        }
+
+        // when the value of star hidden field changed
+        $("#hidden-total-star").change(function () {
+            let value = $(this).val();
+            let arr = [];
+            arr.push($("#span-star-1"));
+            arr.push($("#span-star-2"));
+            arr.push($("#span-star-3"));
+            arr.push($("#span-star-4"));
+            arr.push($("#span-star-5"));
+            setStarValue(arr, value);
+        });
+
+        // when click the star
+        $(document).on("click", ".span-star", function () {
+            // alert(this);
+            let tempId = parseInt($(this).attr("data-star-id"));
+
+            // set the value and trigger the change event
+            $("#hidden-total-star").val(tempId).trigger("change");
+        });
+
+        $("#btn-post-review").click(function (event) {
+            let self = $(this);
+            let restaurant_id = $("#hidden-restaurant-id").val();
+            let description = $("#textarea-review").val();
+            let rate = $("#hidden-total-star").val();
+
+            console.log(self);
+            console.log(restaurant_id);
+            console.log(description);
+            console.log(rate);
+
+            if (description == null || description == "") {
+                alert("review field is required");
+                return;
+            } else if (description.length > 255) {
+                alert("max review length is 255");
+                return;
+            }
+
+            if (rate <= 0) {
+                alert("please rate the restaurant");
+                return;
+            }
+
+            $.ajax({
+                type: "GET",
+                url: "{% url 'review_create' %}",
+                // dataType: "json",
+                data: {
+                    "restaurant_id": restaurant_id,
+                    "description": description,
+                    "rate": rate,
+                },
+                success: function (data) {
+                    if (data.is_not_authenticated) {
+                        // redirect to login page
+                        window.location.href = "{% url 'login' %}";
+                    } else {
+                        // clear the textarea
+                        $("#textarea-review").val("");
+                        // reset the star
+                        $("#hidden-total-star").val("0").trigger("change");
+                        // insert new html element
+                        $("#my-review-div").html(data);
+
+                        $.ajax({
+                            url: "{% url 'restaurant_rate' %}",
+                            type: "GET",
+                            // dataType: "json",
+                            data: {
+                                'restaurant_id': restaurant_id,
+                            },
+                            success: function (data) {
+                                let review_count = data.review_count;
+                                let avg_rate = data.avg_rate;
+
+                                $("#span-review-count").text(review_count);
+                                $("#span-avg-rate").text(avg_rate);
+                            },
+                            error: function (jqXHR, textStatus) {
+                                console.log(jqXHR);
+                                console.log("something wrong...");
+                            },
+                        });
+                    }
+                },
+                error: function (jqXHR, status) {
+                    console.log(jqXHR)
+                },
+            });
+        });
+    });
+</script>
+{% endblock javascript %}

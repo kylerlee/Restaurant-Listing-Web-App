@@ -1,0 +1,27 @@
+{% extends "sgfood/base.html" %}
+{% load static %}
+{% block title %} Category {% endblock %}
+{% block content %}
+
+<div class="container-fluid">
+    <h2 class="mt-2 mb-3">Cuisine Category</h2>
+    <div class="row">
+        {% for c in categories %}
+        <div class="col-lg-4 col-md-4 col-sm-6">
+            <div class="cuisine-grid">
+                <div class="cuisine-image">
+                    <a href="{% url 'restaurant_list' c.id %}">
+                        <img src="{% static 'sgfood/icon/' %}{{c.description}}.jpg" alt="cuisine image"
+                            class="img-thumbnail">
+                    </a>
+                </div>
+                <div class="cuisine-content mt-1 mb-3">
+                    <h4 class="text-center">{{ c.description }}</h4>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+{% endblock content %}

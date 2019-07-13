@@ -1,0 +1,98 @@
+{% extends "sgfood/base.html" %}
+{% load static %}
+{% block title %} Restaurants {% endblock %}
+{% block javascript %}
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        function getReviewAndRating(id) {
+            $.ajax({
+                url: "{% url 'restaurant_rate' %}",
+                type: "GET",
+                // dataType: "json",
+                data: {
+                    'restaurant_id': id,
+                },
+                success: function (data) {
+                    $("#review-count-" + id).text(data.review_count);
+                    $("#avg-rate-" + id).each((idx, elem) => {
+                        let rate = Math.floor(data.avg_rate);
+                        let arr = [];
+                        arr.push($(elem).children("#single-review-span-star-1"));
+                        arr.push($(elem).children("#single-review-span-star-2"));
+                        arr.push($(elem).children("#single-review-span-star-3"));
+                        arr.push($(elem).children("#single-review-span-star-4"));
+                        arr.push($(elem).children("#single-review-span-star-5"));
+
+                        let i = 0;
+                        for (i = 0; i < arr.length; i++) {
+                            if (i < rate) {
+                                arr[i].removeClass("unchecked").addClass("checked");
+                                arr[i].removeClass("fa-star-o").addClass("fa-star");
+                            } else {
+                                arr[i].removeClass("checked").addClass("unchecked");
+                                arr[i].removeClass("fa-star").addClass("fa-star-o");
+                            }
+                        }
+                    });
+                },
+                error: function (jqXHR, textStatus) {
+                    console.log(jqXHR);
+                    console.log("something wrong...");
+                },
+            });
+        }
+
+        $("div.my-test-div").each((idx, elem) => {
+            let rId = parseInt(elem.getAttribute("data-star-review-id"));
+            getReviewAndRating(rId);
+        });
+    });
+</script>
+
+{% endblock javascript %}
+
+{% block content %}
+
+{% if restaurants.count != 0 %}
+
+<div class="container-fluid">
+    <h2 class="mt-2 mb-3">{{restaurants.first.category.description}} Cuisine</h2>
+    <div class="row">
+
+        {% for r in restaurants %}
+
+        <div class="col-lg-4 col-md-4 col-sm-6">
+            <div class="restaurant-grid">
+                <div class="restaurant-image">
+                    <a href="{% url 'restaurant_detail' r.category.id r.id %}">
+                        <img src="{% static 'sgfood/icon/' %}{{r.name}}.jpg" alt="restaurant image"
+                            class="img-thumbnail">
+                    </a>
+                </div>
+                <div class="restaurant-content text-center mt-1 mb-3">
+                    <h6>{{ r.name }}</h6>
+                    <p>{{ r.address }}</p>
+                    <p><i class="far fa-comment-dots"></i> <span id="review-count-{{r.id}}"></span> reviews</p>
+                    <div id="avg-rate-{{r.id}}" class="my-test-div" data-star-review-id="{{r.id}}">
+                        <span id="single-review-span-star-1" class="fa fa-star-o unchecked" data-star-id="1"></span>
+                        <span id="single-review-span-star-2" class="fa fa-star-o unchecked" data-star-id="2"></span>
+                        <span id="single-review-span-star-3" class="fa fa-star-o unchecked" data-star-id="3"></span>
+                        <span id="single-review-span-star-4" class="fa fa-star-o unchecked" data-star-id="4"></span>
+                        <span id="single-review-span-star-5" class="fa fa-star-o unchecked" data-star-id="5"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {% endfor %}
+    </div>
+</div>
+
+{% else %}
+
+<h4 class="mt-2 mb-3">Ooppss.. We are trying our best to include more restaurants as soonest.</h4>
+
+{% endif %}
+
+{% endblock content %}
