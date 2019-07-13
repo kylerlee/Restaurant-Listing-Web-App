@@ -1,8 +1,5 @@
-# django_workshop
-GDipSA 47_Python Enrichment Workshop
-
-# Installation
-1.Clone the project to the local host -> https://github.com/57chi/django_workshop.git
+# How to run the application
+1.Clone the project to the local repository -> https://github.com/kylerlee/Restaurant-Reviews-Web-App.git
 
 2.Install anaconda -> https://www.anaconda.com/distribution/#download-section
 
