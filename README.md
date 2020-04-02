@@ -1,14 +1,22 @@
-# How to run the application
-1.Clone the project to the local repository -> https://github.com/kylerlee/Restaurant-Reviews-Web-App.git
+# Restaurant-Listing-Web-App
 
-2.Install anaconda -> https://www.anaconda.com/distribution/#download-section
+A web application (Django) for restaurants listing and users review. (Like, Post, Comment and Reply)
 
-3.Create new environment -> conda create -n ENV1 python=3.6.7
+## Setup process
 
-4.Activate environment -> conda activate ENV1
+1. Clone the project source code from [GitHub](https://github.com/kylerlee/Restaurant-Reviews-Web-App.git).
+2. Install [Anaconda](https://www.anaconda.com/distribution/#download-section).
+3. Open Anaconda Prompt.
+4. Create new environment by typing `conda create -n ENV1 python=3.6.7`, python version might be different.
+5. Activate environment by typing `conda activate ENV1`.
+6. Install the project dependency by typing `pip install --upgrade django-crispy-forms`.
+7. Run on the server by typing `python manage.py runserver`.
 
-5.Install dependency -> pip install --upgrade django-crispy-forms
+## App user guide
 
-6.Run on the server -> python manage.py runserver
+1. Browse through the restaurants of different cuisines.
+2. Create a new user for adding comments and reviews for the restaurants.
 
-7.Try out our website and create a new user for adding new comments and reviews (optional).
+## License
+
+The content of this repository is licensed under a [MIT License](https://github.com/kylerlee/Restaurant-Listing-Web-App/blob/master/LICENSE).
